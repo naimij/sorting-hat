@@ -22,7 +22,7 @@
             type: "GET",
             dataType: "json",  
             url: "api.php?spell=" + spell,
-            success: toConsole,
+            success: potterJSON,
             cache:false
         }).fail(function (jqXHR, textStatus, error) {
         // Handle error here
@@ -38,11 +38,110 @@
     }
  
     function potterJSON(data){
-        
+ 
+        $.each(data.characters,function(i,item){
+            let str = '';
+            str += potterTemplate(item);
+            $('#potterTable').append(str);
+        });
+
+      /*
         let myData = JSON.stringify(data,null,4);
         myData = '<pre>' + myData + '</pre>';
         $('#output').html(myData);
+        */
     }
+
+      function potterTemplate(obj){
+        	   let houseTitle = '';
+        let alignmentTitle = '';
+        let genderTitle = '';
+        let roleTitle = '';
+        let alignmentPic = '';
+	   
+        //adapted sorting hat songs to titles of houses
+          switch(obj.house)
+          {
+              case 'Gryffindor':
+                  houseTitle = 'Where dwell the brave at heart, daring, nerve, and chivalry set Gryffindors apart';
+              break;
+                  
+              case 'Slytherin':
+                  houseTitle = 'In Slytherin You\'ll make your real friends, cunning folk who use any means to achieve their ends';
+              break;
+  
+              case 'Ravenclaw':
+                  houseTitle = 'In Ravenclaw, if you\'ve a ready mind, those of wit and learning will always find their kind';
+              break;    
+  
+              case 'Hufflepuff':
+                  houseTitle = 'If are just and loyal, those patient Hufflepuffs are true and unafraid of toil'; 
+              break; 
+                  
+              default:
+                  houseTitle = 'There\'s nothing hidden in your head the Sorting Hat can\'t see, so try me on and I will tell you Where you ought to be';
+          }
+          
+          if(obj.alignment == 'good')
+          {//adds specific mouse over/title based on role
+              alignmentTitle = 'Goody two shoes!';
+              alignmentPic = 'good';
+          }else if(obj.alignment == 'evil'){
+              alignmentTitle = 'Bad to the bone!';
+              alignmentPic = 'evil';
+              
+          }else{
+              alignmentTitle = 'Be careful!  We don\'t know what we\'ve got here!';
+              alignmentPic = 'crossed';
+          }
+          
+           if(obj.gender == 'm')
+          {//adds specific mouse over/title based on role
+              genderTitle = 'Snakes and snails and puppydog tails!';
+          }else if(obj.gender == 'f'){
+              genderTitle = 'Sugar and spice and everything nice!';   
+          }else{
+              genderTitle = 'Be careful!  We don\'t know what we\'ve got here!';
+          }
+  
+  
+  
+  if(obj.role == 'student')
+  {//adds specific mouse over/title based on role
+      roleTitle = 'Interested in students?  Let\'s keep things proper here!';
+  }else if(obj.role == 'staff'){
+      roleTitle = 'Like the rod? Our staff will never spare you!';   
+  }else{
+      roleTitle = 'Be careful!  We don\'t know what we\'ve got here!';
+  }
+
+        return `
+         <tr>
+           <td>
+            <p>${obj.name}</p>
+            <p><img height="100px" src="lego-harry-potter/${obj.name.toLowerCase().replace(' ','-')}-lego.jpg"></p>
+        </td>
+        <td title="${roleTitle}" class="category">
+            <p class="potterPlus">${obj.role}</p>
+            <p><img height="50px" src="lego-harry-potter/${obj.role}.png"></p>
+        </td>
+        <td class="category" title="${houseTitle}">
+            <p>${obj.house}</p>
+            <p><img height="100px" src="lego-harry-potter/${obj.house.toLowerCase()}-patch.jpg"></p>
+        </td>
+        <td class="category" title="${genderTitl}e">
+            <p class="potterPlus">${obj.gender}</p>
+            <p><img height="40px" src="lego-harry-potter/${obj.gender}.png"></p>
+        </td>
+        <td class="category" title="${alignmentTitle}">
+            <p class="potterPlus">${obj.alignment}</p>
+            <p><img height="40px" src="lego-harry-potter/${alignmentPic}.png"></p>
+        </td>
+    </tr>
+
+         `;
+        }
+
     </script>   
 
     <style type="text/css">
@@ -185,6 +284,7 @@
                 <th>gender</th>
                 <th>alignment</th>
             </tr>
+          
         </table>
         
         <div id="output"></div>
