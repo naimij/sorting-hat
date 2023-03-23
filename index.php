@@ -9,6 +9,13 @@
 <script> 
     $(document).ready(function() {  
 
+      $('#potterForm').submit(function(e){
+            e.preventDefault(); //stop default action of the link
+            let spell = 'patronus';
+            loadAJAX(spell);  //load AJAX and parse JSON file
+        });
+
+
 	$('.spell').click(function(e){
             e.preventDefault(); //stop default action of the link
             let spell = $(this).attr("href");  //get category from URL
@@ -39,13 +46,33 @@
  
     function potterJSON(data){
  
-        $.each(data.characters,function(i,item){
+       //get selected houses for title display
+        var house_checkboxes = $('input[name=character_house]:checked');
+        var houses = [];
+        $(house_checkboxes).each(function(){
+            houses.push(this.value); //add to an array of selected houses
+        });
+        
+        //add array of houses to title
+        if(houses != "")
+        {
+            houses = "Houses: " + houses.join(', ');  //join builds comma separated string from array
+            $('<h4></h4>').html(houses).appendTo('#sort');
+        }else{
+            $('<h4></h4>').html('No houses selected').appendTo('#sort');
+        }
+
+      let result = _.filter(data.characters, getHousesByCharacter);//underscore filters by house
+        _.each(result, loadPotterTemplate);  //show each of the items
+
+
+      /*
+      $.each(data.characters,function(i,item){
             let str = '';
             str += potterTemplate(item);
             $('#potterTable').append(str);
         });
 
-      /*
         let myData = JSON.stringify(data,null,4);
         myData = '<pre>' + myData + '</pre>';
         $('#output').html(myData);
@@ -58,6 +85,7 @@
         let genderTitle = '';
         let roleTitle = '';
         let alignmentPic = '';
+        let rolePic= obj.role;
 	   
         //adapted sorting hat songs to titles of houses
           switch(obj.house)
@@ -113,6 +141,7 @@
       roleTitle = 'Like the rod? Our staff will never spare you!';   
   }else{
       roleTitle = 'Be careful!  We don\'t know what we\'ve got here!';
+    rolePic = 'crossed';
   }
 
         return `
@@ -123,13 +152,13 @@
         </td>
         <td title="${roleTitle}" class="category">
             <p class="potterPlus">${obj.role}</p>
-            <p><img height="50px" src="lego-harry-potter/${obj.role}.png"></p>
+            <p><img height="50px" src="lego-harry-potter/${rolePic}.png"></p>
         </td>
         <td class="category" title="${houseTitle}">
             <p>${obj.house}</p>
             <p><img height="100px" src="lego-harry-potter/${obj.house.toLowerCase()}-patch.jpg"></p>
         </td>
-        <td class="category" title="${genderTitl}e">
+        <td class="category" title="${genderTitle}e">
             <p class="potterPlus">${obj.gender}</p>
             <p><img height="40px" src="lego-harry-potter/${obj.gender}.png"></p>
         </td>
@@ -141,6 +170,27 @@
 
          `;
         }
+
+  function loadPotterTemplate(item, indx, list) 
+    {//get data for one film
+        let str = '';
+        str += potterTemplate(item);
+        $('#potterTable').append(str); 
+    }
+
+   function getHousesByCharacter(item)
+    {//filter to selected houses
+
+        //acquire checkbox data direct from form
+        var house_checkboxes = $('input[name=character_house]:checked');
+
+        for(x=0;x<house_checkboxes.length;x++)
+        {//
+            if(house_checkboxes[x].value===item.house){return true;}
+        }
+        return false; //default if nothing inside found to match
+    }
+
 
     </script>   
 
@@ -276,6 +326,18 @@
     <p>Are you in search of an evil female staff member from house Slytherin?</p>
     <p>Choose categories below to find your match in the <span class="potterFont">Hogwart's Friend Finder</span> below!</p>
         <p><a href="patronus" class="spell">Patronus!</a></p>
+
+      <h3 id="sort">Sort</h3>
+        <form id="potterForm">
+		<p>Please identify houses on which to filter:</p>
+            <input type="checkbox" name="character_house" value="Gryffindor">Gryffindor<br />
+            <input type="checkbox" name="character_house" value="Hufflepuff">Hufflepuff <br />
+            <input type="checkbox" name="character_house" value="Ravenclaw">Ravenclaw <br />
+            <input type="checkbox" name="character_house" value="Slytherin">Slytherin <br />
+        </p>
+        <p><input type="submit" value="Patronus!" /></p>
+        </form>
+
         <table id="potterTable" border='1'>
             <tr>
                 <th>name</th>
